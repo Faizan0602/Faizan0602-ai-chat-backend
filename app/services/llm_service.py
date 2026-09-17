@@ -165,3 +165,21 @@ def chat_with_tools(message: str) -> str:
         return followup.choices[0].message.content
 
     return msg.content  
+
+def chat_completion_with_history(messages: list[dict]) -> str:
+    response = client.chat.completions.create(
+        model=MODEL,
+        messages=messages,
+    )
+    return response.choices[0].message.content
+
+async def stream_chat_completion_with_history(messages: list[dict]):
+    stream = client.chat.completions.create(
+        model=MODEL,
+        messages=messages,
+        stream=True,
+    )
+    for chunk in stream:
+        content = chunk.choices[0].delta.content
+        if content:
+            yield content
