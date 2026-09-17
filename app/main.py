@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from app.database import Base, engine
-from app.routers import auth, ai,  documents, chat, system
+from app.routers import auth, ai, chat, system
 from app.routers.system import REQUEST_COUNT
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
