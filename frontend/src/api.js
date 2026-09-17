@@ -1,6 +1,9 @@
 import axios from "axios";
 
-const API_BASE = "https://orbitchat-b3ku.onrender.com/api/v1";
+const configuredApiUrl = import.meta.env.VITE_API_URL || "https://orbitchat-b3ku.onrender.com";
+const API_BASE = configuredApiUrl.replace(/\/$/, "").endsWith("/api/v1")
+  ? configuredApiUrl.replace(/\/$/, "")
+  : `${configuredApiUrl.replace(/\/$/, "")}/api/v1`;
 
 const api = axios.create({ baseURL: API_BASE });
 let refreshPromise = null;
