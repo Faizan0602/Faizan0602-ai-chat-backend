@@ -7,7 +7,6 @@ pydantic-settings
 passlib[bcrypt]
 python-jose[cryptography]
 groq
-sentence-transformers
 redis
 pypdf
 python-multipart
