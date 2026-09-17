@@ -55,13 +55,6 @@ async def stream_chat_completion(message: str):
     yield "data: [DONE]\n\n"
 
 
-# =========================
-# EMBEDDINGS
-# =========================
-_embedding_model = SentenceTransformer("all-MiniLM-L6-v2")
-
-def get_embedding(text: str) -> list[float]:
-    return _embedding_model.encode(text).tolist()
 
 
 # =========================
