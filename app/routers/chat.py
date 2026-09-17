@@ -15,6 +15,15 @@ def create_conversation(body: ConversationCreate, user=Depends(get_current_user)
     db.add(convo); db.commit(); db.refresh(convo)
     return convo
 
+@router.get("/conversations", response_model=list[ConversationOut])
+def list_conversations(user=Depends(get_current_user), db: Session = Depends(get_db)):
+    return (
+        db.query(Conversation)
+        .filter(Conversation.user_id == user.id)
+        .order_by(Conversation.created_at.desc())
+        .all()
+    )
+    
 @router.get("/conversations/{id}/messages", response_model=list[MessageOut])
 def get_messages(id: int, user=Depends(get_current_user), db: Session = Depends(get_db)):
     convo = db.query(Conversation).filter(Conversation.id == id, Conversation.user_id == user.id).first()

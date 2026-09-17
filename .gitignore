@@ -3,4 +3,4 @@ __pycache__/
 *.pyc
 .env
 .idea/
-.vscode/
+.vscode/git rm -r --cached venv
