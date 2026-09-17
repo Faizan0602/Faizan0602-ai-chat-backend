@@ -10,3 +10,4 @@ groq
 redis
 pypdf
 python-multipart
+slowapi
