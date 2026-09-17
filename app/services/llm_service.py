@@ -1,6 +1,6 @@
 from groq import Groq
 from app.core.config import settings
-from sentence_transformers import SentenceTransformer
+
 from datetime import datetime
 import json
 
