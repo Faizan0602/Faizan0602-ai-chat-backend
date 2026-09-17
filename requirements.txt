@@ -9,3 +9,4 @@ python-jose[cryptography]
 groq
 sentence-transformers
 redis
+pypdf

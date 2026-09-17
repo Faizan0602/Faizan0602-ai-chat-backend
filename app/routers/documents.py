@@ -1,6 +1,7 @@
 # app/routers/documents.py
 import os
-from fastapi import APIRouter, Depends, UploadFile, HTTPException
+from fastapi import APIRouter, Depends, UploadFile, HTTPException, BackgroundTasks
+from app.services.ingestion_service import process_document
 from sqlalchemy.orm import Session
 from app.core.dependencies import get_current_user, get_db
 from app.models.document import Document
@@ -13,7 +14,12 @@ MAX_SIZE = 10 * 1024 * 1024  # 10 MB
 UPLOAD_DIR = "uploads"
 
 @router.post("/upload", response_model=DocumentOut)
-async def upload_document(file: UploadFile, user=Depends(get_current_user), db: Session = Depends(get_db)):
+async def upload_document(
+    file: UploadFile,
+    background_tasks: BackgroundTasks,
+    user=Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
     if file.content_type not in ALLOWED_TYPES:
         raise HTTPException(400, f"Unsupported file type: {file.content_type}")
 
@@ -34,6 +40,9 @@ async def upload_document(file: UploadFile, user=Depends(get_current_user), db: 
         status="uploaded",
     )
     db.add(doc); db.commit(); db.refresh(doc)
+
+    background_tasks.add_task(process_document, doc.id, save_path, file.content_type)
+
     return doc
 
 @router.get("", response_model=list[DocumentOut])
