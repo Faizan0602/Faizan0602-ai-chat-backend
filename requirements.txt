@@ -10,3 +10,4 @@ groq
 sentence-transformers
 redis
 pypdf
+python-multipart
