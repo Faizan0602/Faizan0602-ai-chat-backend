@@ -13,11 +13,11 @@ A full-stack, production-grade AI chat application — built from the ground up 
 
 | Login | Register |
 |---|---|
-| ![Login](./screenshots/login.png) | ![Register](./screenshots/register.png) |
+| ![Login](./screenshots/Login.png) | ![Register](./screenshots/Register.png) |
 
 | Chat Dashboard | Conversation View |
 |---|---|
-| ![Dashboard](./screenshots/dashboard.png) | ![Chat](./screenshots/chat.png) |
+| ![Dashboard](./screenshots/Dashboard.png) | ![Chat](./screenshots/Chat.png) |
 
 
 ---
