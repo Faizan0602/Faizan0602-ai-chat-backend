@@ -19,8 +19,10 @@ app.add_middleware(
     allow_origins=[
         "http://localhost:5173",
         "http://127.0.0.1:5173",
-        "https://frontend-psi-three-kw4r0bg8r2.vercel.app"
+        "https://frontend-psi-three-kw4r0bg8r2.vercel.app",
+        "https://frontend-18h8d02hv-faizans-projects-b9246ece.vercel.app",
     ],
+    allow_origin_regex=r"https://frontend-[a-z0-9-]+\.vercel\.app",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
