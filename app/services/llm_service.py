@@ -1,13 +1,24 @@
-from groq import Groq
+from groq import AsyncGroq, Groq
 from app.core.config import settings
 
 from datetime import datetime
 import json
 
 client = Groq(api_key=settings.GROQ_API_KEY)
+async_client = AsyncGroq(api_key=settings.GROQ_API_KEY)
 
 
 MODEL = "openai/gpt-oss-120b"
+MAX_COMPLETION_TOKENS = 500
+SYSTEM_PROMPT = (
+    "You are Orbit, a concise and helpful AI assistant. "
+    "Answer directly in a few paragraphs or a short list. "
+    "Give detailed explanations only when the user explicitly asks for detail."
+)
+
+
+def build_chat_messages(messages: list[dict]) -> list[dict]:
+    return [{"role": "system", "content": SYSTEM_PROMPT}, *messages]
 
 
 # =========================
@@ -16,11 +27,10 @@ MODEL = "openai/gpt-oss-120b"
 def chat_completion(message: str) -> str:
     response = client.chat.completions.create(
         model=MODEL,
+        max_tokens=MAX_COMPLETION_TOKENS,
         messages=[
-            {
-                "role": "user",
-                "content": message
-            }
+            {"role": "system", "content": SYSTEM_PROMPT},
+            {"role": "user", "content": message},
         ],
     )
 
@@ -31,28 +41,20 @@ def chat_completion(message: str) -> str:
 # STREAMING CHAT (SSE)
 # =========================
 async def stream_chat_completion(message: str):
-    stream = client.chat.completions.create(
+    stream = async_client.chat.completions.create(
         model=MODEL,
+        max_tokens=MAX_COMPLETION_TOKENS,
         messages=[
-            {
-                "role": "user",
-                "content": message
-            }
+            {"role": "system", "content": SYSTEM_PROMPT},
+            {"role": "user", "content": message},
         ],
         stream=True,
     )
 
-    for chunk in stream:
-        try:
-            content = chunk.choices[0].delta.content
-
-            if content:
-                yield f"data: {content}\n\n"
-
-        except Exception:
-            continue
-
-    yield "data: [DONE]\n\n"
+    async for chunk in stream:
+        content = chunk.choices[0].delta.content
+        if content:
+            yield content
 
 
 
@@ -162,17 +164,19 @@ def chat_with_tools(message: str) -> str:
 def chat_completion_with_history(messages: list[dict]) -> str:
     response = client.chat.completions.create(
         model=MODEL,
-        messages=messages,
+        max_tokens=MAX_COMPLETION_TOKENS,
+        messages=build_chat_messages(messages),
     )
     return response.choices[0].message.content
 
 async def stream_chat_completion_with_history(messages: list[dict]):
-    stream = client.chat.completions.create(
+    stream = await async_client.chat.completions.create(
         model=MODEL,
-        messages=messages,
+        max_tokens=MAX_COMPLETION_TOKENS,
+        messages=build_chat_messages(messages),
         stream=True,
     )
-    for chunk in stream:
+    async for chunk in stream:
         content = chunk.choices[0].delta.content
         if content:
             yield content

@@ -92,6 +92,7 @@ export default function Chat() {
       headers: {
         Authorization: `Bearer ${localStorage.getItem("access_token")}`,
         "Content-Type": "application/json",
+        Accept: "text/event-stream",
       },
       body: JSON.stringify({ content }),
       signal: controller.signal,
@@ -115,17 +116,31 @@ export default function Chat() {
 
     const reader = response.body.getReader();
     const decoder = new TextDecoder();
+    let bufferedText = "";
     assistantTextRef.current = "";
 
     while (true) {
       const { done, value } = await reader.read();
+      bufferedText += decoder.decode(value || new Uint8Array(), { stream: !done });
+
+      const events = bufferedText.split("\n\n");
+      bufferedText = events.pop() || "";
+      for (const event of events) {
+        const data = event
+          .split("\n")
+          .filter((line) => line.startsWith("data:"))
+          .map((line) => line.slice(5).trimStart())
+          .join("\n");
+
+        if (!data || data === "[DONE]") continue;
+        assistantTextRef.current += JSON.parse(data);
+        setMessages((current) => current.map((message) =>
+          message.id === "streaming" ? { ...message, content: assistantTextRef.current } : message,
+        ));
+      }
+
       if (done) break;
-      assistantTextRef.current += decoder.decode(value, { stream: true });
-      setMessages((current) => current.map((message) =>
-        message.id === "streaming" ? { ...message, content: assistantTextRef.current } : message,
-      ));
     }
-    assistantTextRef.current += decoder.decode();
     setMessages((current) => current.map((message) =>
       message.id === "streaming" ? { ...message, content: assistantTextRef.current, id: `assistant-${Date.now()}` } : message,
     ));

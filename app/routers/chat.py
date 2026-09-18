@@ -1,4 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
+import json
+
 from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
 from app.core.dependencies import get_current_user, get_db
@@ -48,13 +50,22 @@ async def send_message(id: int, body: MessageCreate, user=Depends(get_current_us
         full_reply = ""
         async for chunk in llm_service.stream_chat_completion_with_history(history):
             full_reply += chunk
-            yield chunk
+            yield f"data: {json.dumps(chunk)}\n\n"
         # after streaming finishes, save the assistant's full reply
         assistant_msg = Message(conversation_id=convo.id, role="assistant", content=full_reply)
         db.add(assistant_msg)
         db.commit()
+        yield "data: [DONE]\n\n"
 
-    return StreamingResponse(generate_and_save(), media_type="text/event-stream")
+    return StreamingResponse(
+        generate_and_save(),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive",
+            "X-Accel-Buffering": "no",
+        },
+    )
 
 @router.delete("/conversations/{id}")
 def delete_conversation(id: int, user=Depends(get_current_user), db: Session = Depends(get_db)):
