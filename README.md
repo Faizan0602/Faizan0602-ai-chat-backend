@@ -19,6 +19,9 @@ A full-stack, production-grade AI chat application — built from the ground up 
 |---|---|
 | ![Dashboard](./screenshots/Dashboard.png) | ![Chat](./screenshots/Chat.png) |
 
+| Database Schema |
+|---|
+| ![Database](./screenshots/Database.png) |
 
 ---
 
